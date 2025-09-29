@@ -7,7 +7,19 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @all_ratings = Movie.all_ratings
+    if params[:ratings]
+      @ratings_to_show = params[:ratings].keys
+    else
+      @ratings_to_show = []
+    end
+
+    # sorting
+    @sort_by = params[:sort_by]
+
+    # fetch movies with both filter + sort
+    @movies = Movie.with_ratings(@ratings_to_show.presence || @all_ratings)
+    @movies = @movies.order(@sort_by) if @sort_by.present?
   end
 
   def new
@@ -36,16 +48,6 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
-  end
-
-  def index
-    @all_ratings = Movie.all_ratings
-    if params[:ratings]
-      @ratings_to_show = params[:ratings].keys
-    else
-      @ratings_to_show = []
-    end
-    @movies = Movie.with_ratings(@ratings_to_show.presence || @all_ratings)
   end
 
   private

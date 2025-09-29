@@ -8,13 +8,21 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    if params[:ratings]
+    if params[:filters_submitted].present?   
+      if params[:ratings].present?
+        @ratings_to_show = params[:ratings].keys
+        session[:ratings] = params[:ratings]
+      else
+        @ratings_to_show = @all_ratings            
+        session.delete(:ratings)                
+      end
+    elsif params[:ratings].present?
       @ratings_to_show = params[:ratings].keys
       session[:ratings] = params[:ratings]
-    elsif session[:ratings]
+    elsif session[:ratings].present?
       @ratings_to_show = session[:ratings].keys
     else
-      @ratings_to_show = []
+      @ratings_to_show = @all_ratings
     end
 
     # sorting
@@ -28,7 +36,7 @@ class MoviesController < ApplicationController
     end
 
     # fetch movies with both filter + sort
-    @movies = Movie.with_ratings(@ratings_to_show.presence || @all_ratings)
+    @movies = Movie.with_ratings(@ratings_to_show)
     @movies = @movies.order(@sort_by) if @sort_by.present?
   end
 

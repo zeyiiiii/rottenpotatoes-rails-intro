@@ -1,7 +1,6 @@
 class Movie < ActiveRecord::Base
   def self.all_ratings
-    # returns an array of all unique ratings in the DB
-    distinct.pluck(:rating).sort
+    Movie.select(:rating).distinct.order(:rating).map(&:rating)
   end
 
   def self.with_ratings(ratings_list)
